@@ -223,7 +223,7 @@
                                 </constraints>
                             </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="What Sounds Good?" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="aEd-ga-Bpd">
-                                <rect key="frame" x="74" y="362" width="227.5" height="30"/>
+                                <rect key="frame" x="74.5" y="362" width="227.5" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="216" id="5VF-5A-lcD"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="30" id="6V3-rZ-kgd"/>

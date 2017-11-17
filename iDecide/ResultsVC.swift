@@ -24,11 +24,13 @@ class ResultsVC: UIViewController, MKMapViewDelegate, UIWebViewDelegate {
     var randomRestaurant = [String: AnyObject]()
     var currentPinCoordinate = CLLocationCoordinate2D()
     var restaurantAddress = String()
+    let context = (UIApplication.shared.delegate as! AppDelegate).cdManager.managedObjectContext
     
 
    
     
     override func viewDidLoad() {
+
         resultLabel.adjustsFontSizeToFitWidth = true
         var randomNumber = Int()
         webActivityIndicator.isHidden = false
@@ -48,7 +50,13 @@ class ResultsVC: UIViewController, MKMapViewDelegate, UIWebViewDelegate {
         
         let restaurantName = randomRestaurant["name"]
         resultLabel.text = restaurantName as! String?
-        
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Restaurant")
+        let fetchPredicate = NSPredicate(format: "name = %@", restaurantName as! CVarArg)
+        fetchRequest.predicate = fetchPredicate
+        let alreadyFavorite = try! context.fetch(fetchRequest)
+        if alreadyFavorite.count > 0 {
+            self.addFavoriteButton.isEnabled = false
+        }
         
         let menuURL = randomRestaurant["menu_url"]
         self.setMenu(url: menuURL as! String)
@@ -79,6 +87,7 @@ class ResultsVC: UIViewController, MKMapViewDelegate, UIWebViewDelegate {
         
     }
     @IBAction func tryAgain(_ sender: Any) {
+        addFavoriteButton.isEnabled = true
         var randomNumber = Int()
         webActivityIndicator.isHidden = false
         webActivityIndicator.startAnimating()
@@ -104,6 +113,13 @@ class ResultsVC: UIViewController, MKMapViewDelegate, UIWebViewDelegate {
         let lonString = location["longitude"] as! String
         let latFloat = Float(latString)
         let lonFloat = Float(lonString)
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Restaurant")
+        let fetchPredicate = NSPredicate(format: "name = %@", restaurantName as! CVarArg)
+        fetchRequest.predicate = fetchPredicate
+        let alreadyFavorite = try! context.fetch(fetchRequest)
+        if alreadyFavorite.count > 0 {
+            self.addFavoriteButton.isEnabled = false
+        }
         currentPinCoordinate.latitude = CLLocationDegrees(latFloat!)
         currentPinCoordinate.longitude = CLLocationDegrees(lonFloat!)
         setupMap(lat: latFloat!, lon: lonFloat!)

@@ -15,6 +15,7 @@ class favoritesViewController: UIViewController, UITableViewDelegate, UITableVie
     @IBOutlet weak var favoritesTableView: UITableView!
     
     var context = (UIApplication.shared.delegate as! AppDelegate).cdManager.managedObjectContext
+    var indexToDelete = [IndexPath]()
     
     
     override func viewDidLoad() {
@@ -29,17 +30,14 @@ class favoritesViewController: UIViewController, UITableViewDelegate, UITableVie
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        let favoriteToDelete = fetchedResultsController?.object(at: indexPath)
-        print(favoriteToDelete)
-        print(indexPath)
-        
+        let objectToDelete = fetchedResultsController?.object(at: indexPath)
         if editingStyle == .delete {
-            context.delete(favoriteToDelete as! Restaurant)
-            favoritesTableView.deleteRows(at: [indexPath], with: .automatic)
+            fetchedResultsController?.managedObjectContext.delete(objectToDelete as! NSManagedObject)
         }
+  
         
     }
-    
+        
     var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult>? {
         didSet{
             fetchedResultsController?.delegate = self
@@ -58,10 +56,39 @@ class favoritesViewController: UIViewController, UITableViewDelegate, UITableVie
         }
     }
     
+//    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//        indexToDelete = [IndexPath]()
+//    }
+//
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        self.favoritesTableView.deleteRows(at: [indexPath!], with: .fade)
+
+    }
+//
+//    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//        for index in indexToDelete {
+//            self.favoritesTableView.deleteRows(at: [index], with: .automatic)
+//        }
+//    }
+    
+    func deleteFavorite() {
+        var favorites = [Restaurant]()
+        for index in indexToDelete {
+            favorites.append(fetchedResultsController?.object(at: index) as! Restaurant)
+            favoritesTableView.deleteRows(at: [index], with: .automatic)
+        }
+        for restaurant in favorites {
+            fetchedResultsController?.managedObjectContext.delete(restaurant)
+        }
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return (fetchedResultsController?.sections?.count)!
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(fetchedResultsController?.fetchedObjects?.count)
-        
-        return (fetchedResultsController?.fetchedObjects?.count)!
+        let sectionData = fetchedResultsController?.sections![section]
+        return (sectionData?.numberOfObjects)!
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -74,7 +101,7 @@ class favoritesViewController: UIViewController, UITableViewDelegate, UITableVie
         
         return cell
     }
-
+    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let app = UIApplication.shared
